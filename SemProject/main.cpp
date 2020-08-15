@@ -8,17 +8,15 @@
 #include "user_authentication.h"
 
 unsigned int display_main_menu(const HANDLE& hout, menu& main_menu);
-void process_main_menu_choice(const HANDLE& hout, unsigned int menu_choice, user& logged_in_user);
+void process_main_menu_choice(const HANDLE& hout, unsigned int menu_choice);
 int main()
 {
     HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
     create_screen(hout);
     clear_screen(hout, 0, 8);
     menu* mainMenu = new menu("Resturantey");
-    user* logged_in_user = new user();
     unsigned int option_choice = display_main_menu(hout, *mainMenu);
-    process_main_menu_choice(hout, option_choice, *logged_in_user);
-    logged_in_user->display_user_profile(hout);
+    process_main_menu_choice(hout, option_choice);
 }
 
 unsigned int display_main_menu(const HANDLE& hout, menu& main_menu) {
@@ -34,17 +32,17 @@ unsigned int display_main_menu(const HANDLE& hout, menu& main_menu) {
 }
 
 
-void process_main_menu_choice(const HANDLE& hout, unsigned int menu_choice, user& logged_in_user) {
+void process_main_menu_choice(const HANDLE& hout, unsigned int menu_choice) {
     if (menu_choice == 0) {
-        clear_screen(hout);
-        user_authenication::login_form(hout, logged_in_user);
+        user* logged_in_user = new user();
+        user_authenication::user_login_auth(hout, *logged_in_user);
     }
     else if (menu_choice == 1) {
         user_authenication::display_resgister_form(hout);
     }
     else if (menu_choice == 2) {
-        clear_screen(hout);
-        std::cout << "Your choice no: " << menu_choice << std::endl;
+        restaurants* rest = new restaurants();
+        restaurants::search_rest(hout, *rest);
     }
     else if(menu_choice == 3) {
         clear_screen(hout);

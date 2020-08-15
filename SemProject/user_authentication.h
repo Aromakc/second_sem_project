@@ -12,7 +12,7 @@ private:
 public:
 	user_authenication(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, int, const std::string&, const std::string&, const std::string&, std::vector<std::string>&, const std::string&, const std::string&, const std::string&);
 	static bool display_resgister_form(const HANDLE& hout);
-	static void login_form(const HANDLE& hout, user& logged_in_user);
+	static void user_login_auth(const HANDLE& hout, user& logged_in_user);
 
 private:
 	static void display_first_page(const HANDLE& hout, std::string& first_name, std::string& last_name, std::string& address, std::string& city, std::string& country, int& country_code);

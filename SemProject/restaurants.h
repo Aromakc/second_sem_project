@@ -12,23 +12,48 @@ class restaurants {
 private:
 	int resturant_id;
 	std::string name;
-	std::string city;
 	std::string	address;
+	std::string city;
 	std::string country;
 	int country_code;
 
-	cuisines* user_dishes;
+	cuisines* dishes;
 	
 	int food_price_range;
 	
-	bool has_online_deliviry;
-	bool has_table_booking;
-	bool has_switch_to_order_menu;
+	std::string has_table_booking;
+	std::string has_online_deliviery;
+	std::string has_switch_to_order_menu;
 	
-	int avg_rating;
+	double avg_rating;
 	int votes;
 
 public:
+	restaurants();
+	restaurants(int, const std::string&, const std::string&, const std::string&, const std::string&, int, std::vector<std::string>&, int, const std::string&, const std::string&, const std::string&, double, int);
+
+	void set_rest_info(int, const std::string&, const std::string&, const std::string&, const std::string&, int);
+	void set_rest_perf_cuisines(const std::vector<std::string>& food_list);
+	void set_rest_price_range(int);
+	void set_rest_features(const std::string&, const std::string&, const std::string&);
+	void load_rating(int, int);
+
 	static void display_top_k(sqlite3*, unsigned int);
+	static void display_resturant_info(const HANDLE& hout, sqlite3* db ,restaurants& rest,const std::string& restaurant_name);
+	static void search_rest(const HANDLE& hout, restaurants& rest);
+
+	
+
+
+private:
+	static bool does_resturant_exist(sqlite3* db, const std::string& restaurant_name);
 	static int display_top_k_callback(void* not_used, int argc, char** argv, char** azColName);
+
+
+	static bool load_restaurant_info(sqlite3* db, const std::string& rest_name, restaurants& rest_to_load);
+	static int load_rest_info_callback(void* memory_to_store_rest_obj, int argc, char** argv, char** azColName);
+	static int load_cuisines_callback(void* memory_to_store_cuisine, int argc, char** argv, char** azColName);
+	static int load_rest_price_range_callback(void* memory_to_store_rest_obj, int argc, char** argv, char** azColName);
+	static int load_rest_features_callback(void* memory_to_store_rest_obj, int argc, char** argv, char** azColName);
+	static int load_rest_rating_callback(void* memory_to_store_rest_obj, int argc, char** argv, char** azColName);
 };

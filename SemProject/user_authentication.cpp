@@ -46,15 +46,15 @@ bool user_authenication::display_resgister_form(const HANDLE& hout)
     return false;
 }
 
-void user_authenication::login_form(const HANDLE& hout, user& logged_in_user)
+void user_authenication::user_login_auth(const HANDLE& hout, user& logged_in_user)
 {
     clear_screen(hout, 8, 12);
-    create_screen_outline(hout, "Sign-in", "*", 0);
+    create_screen_outline(hout, "Sign-in", "*", 15);
 
     goto_xy(hout, 0, 3);
     show_cursor(hout, TRUE);
 
-    center_allign_text_print(hout, "******INSTRUCTIONS******\n", 0);
+    center_allign_text_print(hout, "******INSTRUCTIONS******\n", 15);
     
     std::string entered_username;
     std::string password_salt;
@@ -193,7 +193,7 @@ void user_authenication::display_third_page(const HANDLE& hout, std::string& onl
         std::getline(std::cin, online_delivery);
         online_delivery = to_lower_case(online_delivery);
 
-        move_cursor_off_left_edge_and_print(hout, "Do you prefer online switch to order menu? ", (no_of_try >= 1) ? 4 : 15);
+        move_cursor_off_left_edge_and_print(hout, "Do you prefer switch to order menu? ", (no_of_try >= 1) ? 4 : 15);
         clear_current_line(hout);
         std::getline(std::cin, switch_to_order);
         switch_to_order = to_lower_case(switch_to_order);
@@ -428,9 +428,7 @@ void user_authenication::load_user_info_from_db(sqlite3* db, std::string usernam
         std::cerr << err_msg << std::endl;
     }
 
-    for (size_t i = 0; i < user_cuisine_list.size(); i++) {
-        logged_in_user.add_user_perf_cuisines(user_cuisine_list);
-    }
+    logged_in_user.add_user_perf_cuisines(user_cuisine_list);
 }
 
 int user_authenication::user_private_info_callback(void* memory_to_store_user_obj, int argc, char** argv, char** azColName)

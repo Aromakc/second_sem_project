@@ -23,7 +23,7 @@ void user::display_user_profile(const HANDLE& hout)
 	create_screen_outline(hout, "User Profile", "*", 0);
 
 	goto_xy(hout, 0, 3);
-	show_cursor(hout, TRUE);
+	show_cursor(hout, FALSE);
 	
 	move_cursor_off_left_edge_and_print(hout, "Name: " + this->first_name + " " + this->last_name + '\n', 15);
 	move_cursor_off_left_edge_and_print(hout, "Address: " + this->address + '\n', 15);
