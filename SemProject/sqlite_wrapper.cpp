@@ -13,8 +13,7 @@ sqlite3* open_db(std::string dir)
 
 bool does_entity_exist(sqlite3* db, const std::string& sql_cmd)
 {
-    bool does_entity_exist;
-    does_entity_exist = false;
+    bool does_entity_exist = false;
     char* err_msg;
 
     int err_code = sqlite3_exec(db, sql_cmd.c_str(), does_entity_exist_callback, &does_entity_exist, &err_msg);

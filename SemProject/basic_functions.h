@@ -2,7 +2,14 @@
 #include <iostream>
 #include <string>
 #include <Windows.h>
-#include <limits>
+
+#include <time.h>
+
+#include <stdexcept>
+
+#include <openssl/sha.h>
+#include <iomanip>
+#include <sstream>
 
 std::string to_lower_case(const std::string&);
 std::string to_upper_case(const std::string& line);
@@ -26,4 +33,8 @@ void set_cursor_near_right_and_print(const HANDLE& hout, const std::string& line
 void center_allign_text_print(const HANDLE& hout, const std::string& line, WORD color);
 
 void create_screen_outline(const HANDLE&, const std::string&, const std::string&, WORD);
+
+std::string generate_salt(const unsigned int len);
+std::string getpassword();
+std::string sha256(const std::string str);
 

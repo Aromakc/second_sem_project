@@ -184,3 +184,73 @@ void create_screen_outline(const HANDLE& hout, const std::string& title, const s
 
 	goto_xy(hout, 0, 0);
 }
+
+std::string generate_salt(const unsigned int len) {
+	static const char alphanum[] =
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+	std::string salt(len, 0); //creating a string of size = len with len no of '\0'
+
+	srand((unsigned) time(NULL));
+
+	for (int i = 0; i < len; ++i) {
+		salt[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+	}
+
+	salt[len] = 0;
+	return salt;
+}
+
+std::string getpassword()
+{
+	std::string result;
+
+	// Set the console mode to no-echo, not-line-buffered input
+	DWORD mode, count;
+	HANDLE ih = GetStdHandle(STD_INPUT_HANDLE);
+	HANDLE oh = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (!GetConsoleMode(ih, &mode))
+		throw std::runtime_error(
+			"getpassword: You must be connected to a console to use this program.\n"
+		);
+	SetConsoleMode(ih, mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
+
+	char c;
+	while (ReadConsoleA(ih, &c, 1, &count, NULL) && (c != '\r') && (c != '\n'))
+	{
+		if (c == '\b')
+		{
+			if (result.length())
+			{
+				WriteConsoleA(oh, "\b \b", 3, &count, NULL);
+				result.erase(result.end() - 1);
+			}
+		}
+		else
+		{
+			WriteConsoleA(oh, "*", 1, &count, NULL);
+			result.push_back(c);
+		}
+	}
+
+	// Restore the console mode
+	SetConsoleMode(ih, mode);
+	std::cout<<std::endl;
+	return result;
+}
+
+std::string sha256(const std::string str)
+{
+	unsigned char hash[SHA256_DIGEST_LENGTH];
+	SHA256_CTX sha256;
+	SHA256_Init(&sha256);
+	SHA256_Update(&sha256, str.c_str(), str.size());
+	SHA256_Final(hash, &sha256);
+	std::stringstream ss;
+	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+	{
+		ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+	}
+	return ss.str();
+}

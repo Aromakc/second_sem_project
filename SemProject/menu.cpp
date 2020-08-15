@@ -51,6 +51,7 @@ unsigned int menu::get_selection(const HANDLE& hout) {
 		SetConsoleTextAttribute(hout, 15);
 		std::cin >> choice;
 		if (does_option_exist(choice)) {
+			std::cin.ignore(123, '\n'); //flush out the newline character
 			return choice_no(choice);
 		}
 		no_of_try++;
