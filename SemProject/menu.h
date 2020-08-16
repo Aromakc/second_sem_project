@@ -13,6 +13,8 @@ public:
 	bool add_option(const std::string&);
 	void display_menu(const HANDLE&, const std::string&, const std::string&, WORD, WORD);
 	unsigned int get_selection(const HANDLE&);
+	void display_exit_message(const HANDLE& hout,const std::string& quit_msg_title,const std::string& quit_screen);
+
 private:
 	bool does_option_exist(const std::string&);
 	inline int calculate_mid_X(int , const CONSOLE_SCREEN_BUFFER_INFO&);

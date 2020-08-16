@@ -185,6 +185,14 @@ void create_screen_outline(const HANDLE& hout, const std::string& title, const s
 	goto_xy(hout, 0, 0);
 }
 
+bool convert_yes_no_to_bool(std::string& word) {
+	std::string result = to_lower_case(word);
+	if (result.compare("yes") == 0) {
+		return true;
+	}
+	return false;
+}
+
 std::string generate_salt(const unsigned int len) {
 	static const char alphanum[] =
 		"0123456789"

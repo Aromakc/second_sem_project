@@ -34,6 +34,8 @@ void center_allign_text_print(const HANDLE& hout, const std::string& line, WORD 
 
 void create_screen_outline(const HANDLE&, const std::string&, const std::string&, WORD);
 
+bool covert_yes_no_to_bool(std::string&);
+
 std::string generate_salt(const unsigned int len);
 std::string getpassword();
 std::string sha256(const std::string str);

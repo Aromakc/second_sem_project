@@ -7,6 +7,7 @@
 #include "sqlite_wrapper.h"
 #include <Windows.h>
 #include "basic_functions.h"
+#include <algorithm>
 
 class restaurants {
 private:
@@ -39,8 +40,9 @@ public:
 	void load_rating(int, int);
 
 	static void display_top_k(sqlite3*, unsigned int);
-	static void display_resturant_info(const HANDLE& hout, sqlite3* db ,restaurants& rest,const std::string& restaurant_name);
 	static void search_rest(const HANDLE& hout, restaurants& rest);
+	static void display_resturant_info(const HANDLE& hout, sqlite3* db ,restaurants& rest,const std::string& restaurant_name);
+	
 
 	
 
@@ -49,6 +51,11 @@ private:
 	static bool does_resturant_exist(sqlite3* db, const std::string& restaurant_name);
 	static int display_top_k_callback(void* not_used, int argc, char** argv, char** azColName);
 
+	static unsigned int number_of_rest(sqlite3* db, const std::string& restaurant_name);
+	static int rest_no_callback(void* memory_to_store_rest_no, int argc, char** argv, char** azColName);
+
+	static std::vector<std::string> get_city_list(sqlite3* db, const std::string& restaurant_name);
+	static int city_list_callback(void* memory_to_store_list, int argc, char** argv, char** azColName);
 
 	static bool load_restaurant_info(sqlite3* db, const std::string& rest_name, restaurants& rest_to_load);
 	static int load_rest_info_callback(void* memory_to_store_rest_obj, int argc, char** argv, char** azColName);
