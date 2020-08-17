@@ -3,7 +3,6 @@
 #include <string>
 #include <Windows.h>
 
-#include <time.h>
 
 #include <stdexcept>
 
@@ -11,8 +10,14 @@
 #include <iomanip>
 #include <sstream>
 
+#include <time.h>
+#include <chrono>  // chrono::system_clock
+#include <ctime>   // localtime
+#include <sstream> // stringstream
+
 std::string to_lower_case(const std::string&);
 std::string to_upper_case(const std::string& line);
+std::string current_time_and_date();
 
 void create_screen(const HANDLE&);
 void clear_screen(const HANDLE&);
@@ -24,7 +29,7 @@ void clear_current_line(const HANDLE&);
 
 void move_cursor_off_left_edge(const HANDLE&);
 void set_cursor_at_middle(const HANDLE&);
-void set_cursor_near_right(const HANDLE& hout);
+void set_cursor_near_right(const HANDLE&);
 void print_line_with_color(const HANDLE&,const std::string&, WORD);
 
 void move_cursor_off_left_edge_and_print(const HANDLE& hout, const std::string& line, WORD color);

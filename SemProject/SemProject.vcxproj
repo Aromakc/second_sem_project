@@ -170,11 +170,9 @@
   <ItemGroup>
     <ClInclude Include="basic_functions.h" />
     <ClInclude Include="cuisines.h" />
-    <ClInclude Include="favourites.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="restaurants.h" />
-    <ClInclude Include="reviews.h" />
     <ClInclude Include="sqlite_wrapper.h" />
     <ClInclude Include="user.h" />
     <ClInclude Include="user_authentication.h" />

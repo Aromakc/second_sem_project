@@ -401,7 +401,7 @@ void user_authenication::load_user_info_from_db(sqlite3* db, std::string usernam
     int err_code;
 
 
-    std::string get_pesonal_info = "SELECT first_name, last_name, address, city, country, country_code FROM user_info " 
+    std::string get_pesonal_info = "SELECT user_info.id, first_name, last_name, address, city, country, country_code FROM user_info " 
                                    "INNER JOIN user_auth ON user_info.id = user_auth.id "  
                                    "WHERE user_name = \"" + username + "\" AND password = \"" + hashed_password + "\";";
 
@@ -434,7 +434,7 @@ void user_authenication::load_user_info_from_db(sqlite3* db, std::string usernam
 int user_authenication::user_private_info_callback(void* memory_to_store_user_obj, int argc, char** argv, char** azColName)
 {
     user* member_passed = static_cast<user*>(memory_to_store_user_obj);
-    member_passed->set_personal_info(argv[0], argv[1], argv[2], argv[3], argv[4], std::stoi(argv[5]));
+    member_passed->set_personal_info( std::stoi(argv[0]), argv[1], argv[2], argv[3], argv[4], argv[5], std::stoi(argv[6]));
     return 0;
 }
 

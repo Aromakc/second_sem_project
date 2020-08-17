@@ -53,16 +53,10 @@
     <ClInclude Include="user_authentication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="favourites.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="restaurants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cuisines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="reviews.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="menu.h">

@@ -10,6 +10,7 @@ private:
 	std::vector<std::string> menu_options;
 public:
 	menu(const std::string&);
+	~menu();
 	bool add_option(const std::string&);
 	void display_menu(const HANDLE&, const std::string&, const std::string&, WORD, WORD);
 	unsigned int get_selection(const HANDLE&);

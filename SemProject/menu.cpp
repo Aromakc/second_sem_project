@@ -8,6 +8,10 @@ menu::menu(const std::string& menu_title)
 	this->menu_title = menu_title;
 }
 
+menu::~menu()
+{
+}
+
 bool menu::add_option(const std::string& option_name) {
 	if (!does_option_exist(option_name)) {
 		this->menu_options.push_back(option_name);
@@ -18,9 +22,6 @@ bool menu::add_option(const std::string& option_name) {
 
 void menu::display_menu(const HANDLE& hout, const std::string& pattern, const std::string& position, WORD title_forgC_color, WORD title_bacgC_color)
 {
-	
-
-
 	create_screen_outline(hout, this->menu_title,pattern, (title_forgC_color + title_bacgC_color * 16) );
 
 	if (to_lower_case(position).compare("m") == 0 ) {
@@ -49,9 +50,8 @@ unsigned int menu::get_selection(const HANDLE& hout) {
 		clear_line(hout, 32);
 		std::cout << "Enter your choice: ";
 		SetConsoleTextAttribute(hout, 15);
-		std::cin >> choice;
+		std::getline(std::cin, choice);
 		if (does_option_exist(choice)) {
-			std::cin.ignore(123, '\n'); //flush out the newline character
 			return choice_no(choice);
 		}
 		no_of_try++;

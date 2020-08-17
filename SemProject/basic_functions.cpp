@@ -18,6 +18,20 @@ std::string to_upper_case(const std::string& line) {
 	return converted_line;
 }
 
+std::string current_time_and_date()
+{
+	auto now = std::chrono::system_clock::now();
+	auto in_time_t = std::chrono::system_clock::to_time_t(now);
+
+	struct tm time_info;
+	localtime_s(&time_info, &in_time_t);
+
+	char buf[80];
+
+	strftime(buf, sizeof(buf), "%Y-%m-%d | %X", &time_info);
+	return buf;
+}
+
 void create_screen(const HANDLE& hout) {
 	//disable the scroll bar
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -202,7 +216,7 @@ std::string generate_salt(const unsigned int len) {
 
 	srand((unsigned) time(NULL));
 
-	for (int i = 0; i < len; ++i) {
+	for (size_t i = 0; i < len; ++i) {
 		salt[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
 	}
 
