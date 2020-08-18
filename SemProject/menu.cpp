@@ -61,10 +61,7 @@ unsigned int menu::get_selection(const HANDLE& hout) {
 
 void menu::display_exit_message(const HANDLE& hout,const std::string& quit_msg_title ,const std::string& quit_msg)
 {
-	clear_screen(hout, 11, 15);
-	create_screen_outline(hout, quit_msg_title, "%",15);
-	goto_xy(hout, 0, 3);
-
+	cls_and_draw_outline(hout, 11, 15, quit_msg_title, "%", 15);
 	center_allign_text_print(hout, quit_msg, 15);
 	std::cout << std::endl;
 }

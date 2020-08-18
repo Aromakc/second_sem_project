@@ -67,7 +67,7 @@ bool restaurants::update_avg_rating(sqlite3* db, double added_rate)
 		return false;
 	}
 	int newVotes = this->votes + 1;
-	double newRating = (this->avg_rating + added_rate) / newVotes;
+	double newRating = ((this->avg_rating * this->votes) + added_rate) / newVotes;
 	
 
 	char* err_msg;
@@ -95,8 +95,7 @@ std::vector<std::pair<std::pair<std::string, std::string>, std::pair<int, double
 
 void restaurants::search_rest_and(const HANDLE& hout, restaurants& rest, const std::string& for_what)
 {
-	clear_screen(hout, 15, 11);
-
+	
 	bool for_info_display = (to_lower_case(for_what).compare("-di") == 0); //displaying restaurant info
 	bool for_review_and_rating = (to_lower_case(for_what).compare("-rvrt") == 0);   //review and rating
 	bool for_check_in = (to_lower_case(for_what).compare("-ci") == 0); //check in
@@ -104,26 +103,24 @@ void restaurants::search_rest_and(const HANDLE& hout, restaurants& rest, const s
 	bool for_view_review = (to_lower_case(for_what).compare("-vr") == 0); //view review
 
 	if (for_info_display) {
-		create_screen_outline(hout, "Search Restaurant", "*", 15);
+		cls_and_draw_outline(hout, 15, 11, "Search Restaurant", "*", 15);
 	}
 	else if (for_review_and_rating) {
-		create_screen_outline(hout, "Rate and Review Restaurant", "*", 15);
+		cls_and_draw_outline(hout, 15, 11, "Rate and Review Restaurant", "*", 15);
 	}
 	else if (for_check_in) {
-		create_screen_outline(hout, "Check In", "*", 15);
+		cls_and_draw_outline(hout, 15, 11, "Check In", "*", 15);
 	}
 	else if (for_favourite) {
-		create_screen_outline(hout, "Add to Favourites", "*", 15);
+		cls_and_draw_outline(hout, 15, 11, "Add to Favourites", "*", 15);
 	}
 	else if (for_view_review) {
-		create_screen_outline(hout, "Reviews", "*", 15);
+		cls_and_draw_outline(hout, 15, 11, "Reviews", "*", 15);
 	}
 	else {
 		clear_screen(hout);
 		std::cerr << "Restaurant Search: Flag Error" << std::endl;
 	}
-
-	goto_xy(hout, 0, 3);
 	show_cursor(hout, TRUE);
 
 	center_allign_text_print(hout, "******INSTRUCTIONS******\n", 15);
@@ -166,10 +163,7 @@ void restaurants::display_resturant_info(const HANDLE& hout, sqlite3* db, restau
 	if (!load_restaurant_info(db, rest_name, rest)) {
 		move_cursor_off_left_edge_and_print(hout, "Restaurant Not Found In Our Record\n", 4);
 	}
-
-	clear_screen(hout, 15, 11);
-	create_screen_outline(hout, "Restaurant Info", "*", 15);
-	goto_xy(hout, 0, 3);
+	cls_and_draw_outline(hout, 15, 11, "Restaurant Info", "*", 15);
 
 	move_cursor_off_left_edge_and_print(hout, "Restaurant Name: " + rest.name + "\n", 15);
 	move_cursor_off_left_edge_and_print(hout, "Address: " + rest.address + "\n", 15);
@@ -194,6 +188,7 @@ void restaurants::display_resturant_info(const HANDLE& hout, sqlite3* db, restau
 		center_allign_text_print(hout, rest_cuisine_list[i], 15);
 		std::cout << std::endl;
 	}
+	freeze_display(hout);
 }
 
 void restaurants::display_resturant_reviews(const HANDLE& hout, sqlite3* db, restaurants& rest, const std::string& rest_name)
@@ -213,10 +208,11 @@ void restaurants::display_resturant_reviews(const HANDLE& hout, sqlite3* db, res
 	for (size_t i = 0; i < rating_reviews.size(); i++) {
 		user_who_rated = get_reviewer_name(db, rating_reviews[i].second.first);
 		std::string user_rating(std::to_string(rating_reviews[i].second.second), 0, 4);
-		center_allign_text_print(hout, to_upper_case(user_who_rated) + " at " + rating_reviews[i].first.second + " ,Rated " +  user_rating + " and Reviewed:\n", 15);
+		center_allign_text_print(hout, to_upper_case(user_who_rated) + " on " + rating_reviews[i].first.second + " ,Rated " +  user_rating + " and Reviewed:\n", 15);
 		center_allign_text_print(hout, rating_reviews[i].first.first + "\n", 7);
 		std::cout << std::endl;
 	}
+	freeze_display(hout);
 }
 
 //method and helper to display k resturant
@@ -251,7 +247,6 @@ int restaurants::display_top_k_callback(void* not_used, int argc, char** argv, c
 {
 	HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
 	
-
 	for (int i = 0; i < argc; i++)
 	{
 		if (i == 0) {
@@ -261,13 +256,15 @@ int restaurants::display_top_k_callback(void* not_used, int argc, char** argv, c
 			set_cursor_at_middle_and_print(hout, (std::string)argv[i], (0 + 12 * 16));
 		}
 		else{
-			set_cursor_near_right_and_print(hout, (std::string)argv[i], (0 + 15 * 16));
+			std::string user_rating(argv[i], 0, 4);
+			set_cursor_near_right_and_print(hout, user_rating, (0 + 15 * 16));
 		}
 	}
 	std::cout << std::endl;
 	SetConsoleTextAttribute(hout, 15);
 	return 0;
 }
+//method and elper to display k resturant ends
 std::string restaurants::get_reviewer_name(sqlite3* db, int reviewer_id)
 {
 	char* err_msg;
@@ -279,8 +276,6 @@ std::string restaurants::get_reviewer_name(sqlite3* db, int reviewer_id)
 	}
 	return reviewer_full_name;
 }
-//method and elper to display k resturant ends
-
 int restaurants::get_reviewer_name_callback(void* memory_to_hold_name, int argc, char** argv, char** azColName)
 {
 	std::string* name = static_cast<std::string*>(memory_to_hold_name);
@@ -424,7 +419,7 @@ bool restaurants::load_restaurant_info(sqlite3* db, const std::string& rest_name
 	std::string load_rest_cuisine_list;
 	if (no_of_duplicate > 1) {
 		load_rest_cuisine_list = "SELECT cuisine FROM restFoodTypes INNER JOIN restAddressInfo ON restAddressInfo.rest_id = restFoodTypes.rest_id " 
-								 "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + " AND restAddressInfo.city = \"" + selected_city + "\";";
+								 "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
 	}
 	else {
 		load_rest_cuisine_list = "SELECT cuisine FROM restFoodTypes WHERE rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
@@ -439,7 +434,7 @@ bool restaurants::load_restaurant_info(sqlite3* db, const std::string& rest_name
 	std::string load_price_range;
 	if (no_of_duplicate > 1) {
 		load_price_range = "SELECT priceRange FROM restPriceRange INNER JOIN restAddressInfo ON restAddressInfo.rest_id = restPriceRange.rest_id " 
-						   "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + " AND restAddressInfo.city = \"" + selected_city + "\";";
+						   "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
 	}
 	else {
 		load_price_range = "SELECT priceRange FROM restPriceRange WHERE rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
@@ -453,7 +448,7 @@ bool restaurants::load_restaurant_info(sqlite3* db, const std::string& rest_name
 	if (no_of_duplicate > 1) {
 		load_rest_feat = "SELECT hasTableBookingooking, hasOnlineDelivery, switchToOrderMenu FROM restFeatures " 
 						 "INNER JOIN restAddressInfo ON restAddressInfo.rest_id = restFeatures.rest_id "
-						 "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + " AND restAddressInfo.city = \"" + selected_city + "\";";
+						 "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
 	}
 	else {
 		load_rest_feat = "SELECT hasTableBookingooking, hasOnlineDelivery, switchToOrderMenu FROM restFeatures WHERE rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
@@ -467,7 +462,7 @@ bool restaurants::load_restaurant_info(sqlite3* db, const std::string& rest_name
 	if (no_of_duplicate > 1) {
 		load_rest_rate = "SELECT avgRate, votes FROM restRatings "
 						 "INNER JOIN restAddressInfo ON restAddressInfo.rest_id = restRatings.rest_id "
-						 "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + " AND restAddressInfo.city = \"" + selected_city + "\";";
+						 "WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
 	}
 	else {
 		load_rest_rate = "SELECT avgRate, votes FROM restRatings WHERE rest_id = " + std::to_string(rest_to_load.resturant_id) + ";";
@@ -477,13 +472,7 @@ bool restaurants::load_restaurant_info(sqlite3* db, const std::string& rest_name
 	err_code = sqlite3_exec(db, load_rest_rate.c_str(), load_rest_rating_callback, &rest_to_load, &err_msg);
 	if (err_code != SQLITE_OK) {
 		std::cerr << err_msg << std::endl;
-	}
-
-
-
-
-
-	
+	}	
 	
 	std::vector <std::pair<std::pair<std::string, std::string>, std::pair<int, double>>> all_reviews;
 	
@@ -491,18 +480,15 @@ bool restaurants::load_restaurant_info(sqlite3* db, const std::string& rest_name
 	if (no_of_duplicate > 1) {
 		load_reviews_and_rate = "SELECT review, reviewTime, userId, userRate FROM restReviews "
 								"INNER JOIN restAddressInfo ON restAddressInfo.rest_id = restReviews.rest_id "
-								"WHERE restAddressInfo.rest_id = " + std::to_string(rest_to_load.resturant_id) + " AND restAddressInfo.city = \"" + selected_city + "\" "
-								" ORDER BY ROWID DESC LIMIT 5;";
+								"WHERE restAddressInfo.rest_id = '" + std::to_string(rest_to_load.resturant_id) + "'"
+								" ORDER BY reviewTime DESC LIMIT 5;";
 	}
 	else {
 		load_reviews_and_rate = "SELECT review, reviewTime, userId, userRate FROM restReviews WHERE rest_id = " + std::to_string(rest_to_load.resturant_id) + " "
-								"ORDER BY ROWID DESC LIMIT 8;";
+								"ORDER BY reviewTime DESC LIMIT 5;";
 	}
 
 	err_code = sqlite3_exec(db, load_reviews_and_rate.c_str(), load_rest_review_callback, &all_reviews, &err_msg);
-	if (err_code != SQLITE_OK) {
-		std::cerr << err_msg << std::endl;
-	}
 	rest_to_load.set_review_and_rating(all_reviews);
 
 	return true;

@@ -26,6 +26,8 @@ void goto_xy(const HANDLE&,int, int);
 void show_cursor(const HANDLE&, bool);
 void clear_line(const HANDLE&, int);
 void clear_current_line(const HANDLE&);
+void cls_and_draw_outline(const HANDLE&, int, int, const std::string&, const std::string&, WORD);
+void freeze_display(const HANDLE& hout);
 
 void move_cursor_off_left_edge(const HANDLE&);
 void set_cursor_at_middle(const HANDLE&);

@@ -6,11 +6,22 @@ user::user()
 {
 }
 
-user::user(const std::string& first_name, const std::string& last_name, const std::string& address, const std::string& city, const std::string& country, int country_code, const std::string& online_book, const std::string& online_delivery, const std::string& switch_menu, std::vector<std::string>& pref_cuisines)
-	:id(0),first_name(first_name), last_name(last_name), address(address) ,city(city), country(country), country_code(country_code), 
-	 online_book(online_book), online_delivery(online_delivery), switch_menu(switch_menu), user_pref_cuisine(new cuisines(pref_cuisines))
-{
+user::user(const std::string& first_name, const std::string& last_name, const std::string& address, const std::string& city, const std::string& country, int country_code, 
+	const std::string& online_book, const std::string& online_delivery, const std::string& switch_menu, std::vector<std::string>& pref_cuisines, 
+	const std::vector<std::pair<std::string, std::string>>& favourites, const std::vector<std::pair<std::string, std::string>>& checkIns)
 
+	:id(0),first_name(first_name), last_name(last_name), address(address) ,city(city), country(country), country_code(country_code), 
+	 online_book(online_book), online_delivery(online_delivery), switch_menu(switch_menu), user_pref_cuisine(new cuisines(pref_cuisines)),
+	favourite_rest_list(favourites), checked_In_list(checkIns)
+{
+}
+
+user::user(const std::string& first_name, const std::string& last_name, const std::string& address, const std::string& city, const std::string& country, int country_code,
+	const std::string& online_book, const std::string& online_delivery, const std::string& switch_menu, std::vector<std::string>& pref_cuisines)
+
+	:id(0), first_name(first_name), last_name(last_name), address(address), city(city), country(country), country_code(country_code),
+	online_book(online_book), online_delivery(online_delivery), switch_menu(switch_menu), user_pref_cuisine(new cuisines(pref_cuisines))
+{
 }
 
 user::~user()
@@ -45,9 +56,19 @@ void user::set_preference(const std::string& online_book, const std::string& onl
 	this->switch_menu = switch_menu;
 }
 
-void user::add_user_perf_cuisines(const std::vector<std::string>& food_list)
+void user::build_user_perf_cuisines(const std::vector<std::string>& food_list)
 {
 	this->user_pref_cuisine->add_cuisine_list(food_list);
+}
+
+void user::build_user_fav_list(const std::vector<std::pair<std::string, std::string>>& fav_list)
+{
+	this->favourite_rest_list = fav_list;
+}
+
+void user::build_user_checkIn_list(const std::vector<std::pair<std::string, std::string>>& checkIn_list)
+{
+	this->checked_In_list = checkIn_list;
 }
 
 void user::set_id(int id)
@@ -60,10 +81,12 @@ unsigned int user::display_home_page_and_get_choice(const HANDLE& hout)
 {
 	clear_screen(hout, 0, 7);
 	menu* home_page_menu = new menu("Home");
-	home_page_menu->add_option("Recomend");
+	home_page_menu->add_option("Recommend");
 	home_page_menu->add_option("Rate and Review");
 	home_page_menu->add_option("Check In");
+	home_page_menu->add_option("View Check Ins");
 	home_page_menu->add_option("Add Favourites");
+	home_page_menu->add_option("View Favourites");
 	home_page_menu->add_option("Search Restaurant");
 	home_page_menu->add_option("View Reviews");
 	home_page_menu->add_option("View My Profile");
@@ -72,38 +95,45 @@ unsigned int user::display_home_page_and_get_choice(const HANDLE& hout)
 	return home_page_menu->get_selection(hout);
 }
 
-void user::process_home_page_choice(const HANDLE& hout,unsigned int choice) {
-	if (choice == 0) {
-		clear_screen(hout);
-		std::cout << "Recommendation Coming soon!" << std::endl;
-	}
-	else if (choice == 1) {
-		review_and_rate(hout);
-	}
-	else if (choice == 2) {
-		clear_screen(hout);
-		std::cout << "Check in soon!" << std::endl;
-	}
-	else if (choice == 3) {
-		clear_screen(hout);
-		std::cout << "Favourites Coming soon" << std::endl;
-	}
-	else if (choice == 4) {
-		view_restaurant_info(hout);
-	}
-	else if (choice == 5) {
-		display_reviews(hout);
-	}
-	else if (choice == 6) {
-		display_user_profile(hout);
-	}
-	else if(choice == 7){
-		clear_screen(hout);
-		std::cout << "Logged out!" << std::endl;
-	}
-	else {
-		clear_screen(hout);
-		std::cerr << "Unexpected: No such options" << std::endl;
+void user::display_home_page_and_process_choice(const HANDLE& hout) {
+	unsigned choice;
+	while (true) {
+		choice = user::display_home_page_and_get_choice(hout);
+		if (choice == 0) {
+			clear_screen(hout);
+			std::cout << "Recommendation Coming soon" << std::endl;
+			freeze_display(hout);
+		}
+		else if (choice == 1) {
+			review_and_rate(hout);
+		}
+		else if (choice == 2) {
+			check_in(hout);
+		}
+		else if (choice == 3) {
+			display_user_checkIns(hout);
+		}
+		else if (choice == 4) {
+			add_to_favourites(hout);
+		}
+		else if (choice == 5) {
+			display_user_favourites(hout);
+		}
+		else if (choice == 6) {
+			view_restaurant_info(hout);
+		}
+		else if (choice == 7) {
+			display_reviews(hout);
+		}
+		else if (choice == 8) {
+			display_user_profile(hout);
+		}
+		else if (choice == 9) {
+			break;
+		}
+		else {
+			std::cerr << "Error: Unexpected behaviour" << std::endl;
+		}
 	}
 }
 
@@ -113,9 +143,7 @@ void user::review_and_rate(const HANDLE& hout)
 
 	rest->search_rest_and(hout, *rest, "-rvrt");
 
-	clear_screen(hout, 8, 12);
-	create_screen_outline(hout, "Review Restaurant", "*", 15);
-	goto_xy(hout, 0, 3);
+	cls_and_draw_outline(hout, 8, 12, "Review Restaurant", "*", 15);
 	center_allign_text_print(hout, "******INSTRUCTIONS******\n", 15);
 
 	std::string user_review;
@@ -162,15 +190,50 @@ void user::review_and_rate(const HANDLE& hout)
 
 	rest->~restaurants();
 	sqlite3_close(db);
+	freeze_display(hout);
+}
+
+void user::add_to_favourites(const HANDLE& hout)
+{
+	restaurants* rest = new restaurants();
+	rest->search_rest_and(hout, *rest, "-fv");
+
+	sqlite3* db = open_db("restaurants_info.db");
+	if (store_fav_in_db(db, *rest)) {
+		std::cout << std::endl;
+		center_allign_text_print(hout, "**Added to your favourites Successfully**", 1);
+	}
+	else {
+		std::cout << std::endl;
+		center_allign_text_print(hout, "**Adding to favourites list failed.**", 4);
+	}
+	
+	rest->~restaurants();
+	sqlite3_close(db);
+	freeze_display(hout);
+}
+
+void user::check_in(const HANDLE& hout)
+{
+	restaurants* rest = new restaurants();
+	rest->search_rest_and(hout, *rest, "-ci");
+
+	sqlite3* db = open_db("restaurants_info.db");
+	if (store_checked_in_db(db, *rest)) {
+		std::cout << std::endl;
+		center_allign_text_print(hout, "**Checked in Successfully**", 1);
+	}else{
+		std::cout << std::endl;
+		center_allign_text_print(hout, "**Adding to checked-in list failed.**", 4);
+	}
+	rest->~restaurants();
+	sqlite3_close(db);
+	freeze_display(hout);
 }
 
 void user::display_user_profile(const HANDLE& hout)
 {
-	clear_screen(hout, 15, 11);
-	create_screen_outline(hout, "User Profile", "*", 0);
-
-	goto_xy(hout, 0, 3);
-	show_cursor(hout, FALSE);
+	cls_and_draw_outline(hout, 15, 11, "User Profile", "*", 15);
 
 	move_cursor_off_left_edge_and_print(hout, "Name: " + to_upper_case(this->first_name) + " " + to_upper_case(this->last_name) + '\n', 15);
 	move_cursor_off_left_edge_and_print(hout, "Address: " + to_upper_case(this->address) + '\n', 15);
@@ -186,6 +249,7 @@ void user::display_user_profile(const HANDLE& hout)
 		center_allign_text_print(hout, to_upper_case(user_food_pref[i]), 15);
 		std::cout << std::endl;
 	}
+	freeze_display(hout);
 }
 
 void user::display_reviews(const HANDLE& hout) {
@@ -202,6 +266,44 @@ void user::view_restaurant_info(const HANDLE& hout){
 	rest->search_rest_and(hout, *rest, "-di");
 	rest->~restaurants();
 	sqlite3_close(db);
+}
+
+void user::display_user_favourites(const HANDLE& hout)
+{
+	cls_and_draw_outline(hout, 15, 11, "Your Favourites", "*", 15);
+
+	move_cursor_off_left_edge_and_print(hout, "USER: " + to_upper_case(this->first_name) + " " + to_upper_case(this->last_name) + '\n', 15);
+	std::cout << std::endl;
+	center_allign_text_print(hout, "****Favourite Restaurants || Location**** \n", 15);
+
+	size_t noOfFavRest = this->favourite_rest_list.size();
+	std::string restaurant_name;
+	std::string address;
+	for (size_t i = 0; i < noOfFavRest; i++) {
+		restaurant_name = this->favourite_rest_list[i].first;
+		address = this->favourite_rest_list[i].second;
+		center_allign_text_print(hout, restaurant_name + " || " + address + "\n", 15);
+	}
+	freeze_display(hout);
+}
+
+void user::display_user_checkIns(const HANDLE& hout)
+{
+	cls_and_draw_outline(hout, 15, 11, "Your Check Ins", "*", 15);
+
+	move_cursor_off_left_edge_and_print(hout, "USER: " + to_upper_case(this->first_name) + " " + to_upper_case(this->last_name) + '\n', 15);
+	std::cout << std::endl;
+	center_allign_text_print(hout, "****Your Check Ins || Location****\n", 15);
+
+	size_t noOfCheckIns = this->checked_In_list.size();
+	std::string restaurant_name;
+	std::string address;
+	for (size_t i = 0; i < noOfCheckIns; i++) {
+		restaurant_name = this->checked_In_list[i].first;
+		address = this->checked_In_list[i].second;
+		center_allign_text_print(hout, restaurant_name + " || " + address + "\n", 15);
+	}
+	freeze_display(hout);
 }
 
 bool user::store_review_rate_in_db(sqlite3* db, std::string review, std::string time_stamp, double rate, restaurants& rest)
@@ -228,6 +330,44 @@ bool user::store_review_rate_in_db(sqlite3* db, std::string review, std::string 
 		return false;
 	}
 
+	return true;
+}
+
+bool user::store_fav_in_db(sqlite3* db, restaurants& fav_resturant)
+{
+	sqlite3_stmt* st;
+
+	std::string store_favourite = "INSERT INTO user_fav VALUES(?,?);";
+	int res_code = sqlite3_prepare(db, store_favourite.c_str(), -1, &st, NULL);
+
+	if (res_code == SQLITE_OK) {
+		sqlite3_bind_int(st, 1, this->id);
+		sqlite3_bind_int(st, 2, fav_resturant.get_id());
+		sqlite3_step(st);
+		sqlite3_finalize(st);
+	}
+	else {
+		return false;
+	}
+	return true;
+}
+
+bool user::store_checked_in_db(sqlite3* db, restaurants& checkedIn_resturant)
+{
+	sqlite3_stmt* st;
+
+	std::string store_checkIn = "INSERT INTO user_checkIn VALUES(?,?);";
+	int res_code = sqlite3_prepare(db, store_checkIn.c_str(), -1, &st, NULL);
+
+	if (res_code == SQLITE_OK) {
+		sqlite3_bind_int(st, 1, this->id);
+		sqlite3_bind_int(st, 2, checkedIn_resturant.get_id());
+		sqlite3_step(st);
+		sqlite3_finalize(st);
+	}
+	else {
+		return false;
+	}
 	return true;
 }
 

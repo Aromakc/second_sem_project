@@ -1,8 +1,13 @@
 #include "user_authentication.h"
 
 
-user_authenication::user_authenication(const std::string& first_name, const std::string& last_name, const std::string& address, const std::string& city, const std::string& country, int country_code, const std::string& online_book, const std::string& online_delivery, const std::string& switch_menu, std::vector<std::string>& pref_cuisines, const std::string& username, const std::string& password, const std::string& salt)
-    :user(first_name, last_name, address, city, country, country_code, online_book, online_delivery, switch_menu, pref_cuisines), user_name(username), password(password), salt(salt)
+user_authenication::user_authenication(const std::string& first_name, const std::string& last_name, const std::string& address, const std::string& city, 
+    const std::string& country, int country_code, const std::string& online_book, const std::string& online_delivery, const std::string& switch_menu, 
+    std::vector<std::string>& pref_cuisines,
+    const std::string& username, const std::string& password, const std::string& salt)
+
+    :user(first_name, last_name, address, city, country, country_code, online_book, online_delivery, switch_menu, pref_cuisines), 
+    user_name(username), password(password), salt(salt)
 {
 }
 
@@ -34,6 +39,7 @@ bool user_authenication::display_resgister_form(const HANDLE& hout)
         center_allign_text_print(hout, " Registration Successful :) ", 2);
         SetConsoleTextAttribute(hout, 15);
         sqlite3_close(db);
+        freeze_display(hout);
         clear_screen(hout);
         return true;
     }
@@ -42,18 +48,15 @@ bool user_authenication::display_resgister_form(const HANDLE& hout)
     center_allign_text_print(hout," Registration Failed :( ", 4);
     SetConsoleTextAttribute(hout, 15);
     sqlite3_close(db);
+    freeze_display(hout);
     clear_screen(hout);
     return false;
 }
 
 void user_authenication::user_login_auth(const HANDLE& hout, user& logged_in_user)
 {
-    clear_screen(hout, 8, 12);
-    create_screen_outline(hout, "Sign-in", "*", 15);
-
-    goto_xy(hout, 0, 3);
+    cls_and_draw_outline(hout, 8, 12, "Sign-in", "*", 15);
     show_cursor(hout, TRUE);
-
     center_allign_text_print(hout, "******INSTRUCTIONS******\n", 15);
     
     std::string entered_username;
@@ -93,15 +96,9 @@ void user_authenication::user_login_auth(const HANDLE& hout, user& logged_in_use
 
 void user_authenication::display_first_page(const HANDLE& hout, std::string& first_name, std::string& last_name, std::string& address, std::string& city, std::string& country ,int& country_code)
 {
-    clear_screen(hout, 15, 11);
-    create_screen_outline(hout, "Registration: Page - 1", "*", 15);
- 
-    goto_xy(hout, 0, 3);
-    show_cursor(hout, TRUE);
+    cls_and_draw_outline(hout, 15, 11, "Registration: Page - 1", "*", 15);
 
     center_allign_text_print(hout, "******INSTRUCTIONS******\n", 15);
-
-   
 
     move_cursor_off_left_edge_and_print(hout, "First Name? ", 15);
     std::getline(std::cin, first_name);
@@ -156,8 +153,7 @@ void user_authenication::display_first_page(const HANDLE& hout, std::string& fir
 
 void user_authenication::display_second_page(const HANDLE& hout, std::string& user_name, std::string& hashed_password, std::string& salt)
 {
-    clear_screen(hout, 15, 11);
-    create_screen_outline(hout, "Registration: Page - 2", "*", 15);
+    cls_and_draw_outline(hout, 15, 11, "Registration: Page - 2", "*", 15);
 
     goto_xy(hout, 0, 3);
     show_cursor(hout, TRUE);
@@ -170,8 +166,7 @@ void user_authenication::display_second_page(const HANDLE& hout, std::string& us
 
 void user_authenication::display_third_page(const HANDLE& hout, std::string& online_book, std::string& online_delivery, std::string& switch_to_order, std::vector<std::string>& cuisines)
 {
-    clear_screen(hout, 15, 11);
-    create_screen_outline(hout, "Registration: Page - 3", "*", 15);
+    cls_and_draw_outline(hout, 15, 11, "Registration: Page - 3", "*", 15);
 
     goto_xy(hout, 0, 3);
     show_cursor(hout, TRUE);
@@ -427,8 +422,24 @@ void user_authenication::load_user_info_from_db(sqlite3* db, std::string usernam
     if (err_code != SQLITE_OK) {
         std::cerr << err_msg << std::endl;
     }
+    logged_in_user.build_user_perf_cuisines(user_cuisine_list);
 
-    logged_in_user.add_user_perf_cuisines(user_cuisine_list);
+    std::vector<std::pair<std::string, std::string>> fav_list;
+    
+    std::string get_fav = "SELECT restName, address FROM restAddressInfo INNER JOIN user_fav ON restAddressInfo.rest_id = user_fav.restId "
+                          "WHERE  user_fav.userId = " + std::to_string(logged_in_user.get_id()) + " ORDER BY restId DESC LIMIT 25;";
+    err_code = sqlite3_exec(db, get_fav.c_str(), user_fav_OR_checkin_callback, &fav_list, &err_msg);
+    
+    logged_in_user.build_user_fav_list(fav_list);
+
+    std::vector<std::pair<std::string, std::string>> checkIn_list;
+
+    std::string get_check_in = "SELECT restName, address FROM restAddressInfo INNER JOIN user_checkIn ON restAddressInfo.rest_id = user_checkIn.restId "
+                               "WHERE  user_checkIn.userId = " + std::to_string(logged_in_user.get_id()) + " ORDER BY restId DESC LIMIT 25;";
+    
+    err_code = sqlite3_exec(db, get_check_in.c_str(), user_fav_OR_checkin_callback, &checkIn_list, &err_msg);
+    logged_in_user.build_user_checkIn_list(checkIn_list);
+    
 }
 
 int user_authenication::user_private_info_callback(void* memory_to_store_user_obj, int argc, char** argv, char** azColName)
@@ -449,6 +460,18 @@ int user_authenication::user_cuisine_info_callback(void* memory_to_store_cuisine
 {
    std::vector<std::string>* cuisine_list = static_cast<std::vector<std::string>*>(memory_to_store_cuisine); 
    cuisine_list->emplace_back(argv[0]);
+    return 0;
+}
+
+
+int user_authenication::user_fav_OR_checkin_callback(void* fav_OR_check_list, int argc, char** argv, char** azColName) {
+    std::vector<std::pair<std::string, std::string>>* required_list = static_cast<std::vector<std::pair<std::string, std::string>>*>(fav_OR_check_list);
+    
+    std::pair<std::string, std::string> rest_name_address;
+    rest_name_address.first = argv[0];
+    rest_name_address.second =argv[1];
+
+    required_list->emplace_back(rest_name_address);
     return 0;
 }
 

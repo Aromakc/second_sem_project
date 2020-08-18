@@ -10,7 +10,11 @@ private:
 	std::string password;
 	std::string salt;
 public:
-	user_authenication(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, int, const std::string&, const std::string&, const std::string&, std::vector<std::string>&, const std::string&, const std::string&, const std::string&);
+	user_authenication(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, int, const std::string&, 
+		const std::string&, const std::string&, std::vector<std::string>&,
+		const std::string&, const std::string&, const std::string&);
+
+
 	static bool display_resgister_form(const HANDLE& hout);
 	static void user_login_auth(const HANDLE& hout, user& logged_in_user);
 
@@ -31,6 +35,7 @@ private:
 	static int user_private_info_callback(void* memory_to_store_user_obj, int argc, char** argv, char** azColName);
 	static int user_pref_info_callback(void* memory_to_store_user_obj, int argc, char** argv, char** azColName);
 	static int user_cuisine_info_callback(void* memory_to_store_user_obj, int argc, char** argv, char** azColName);
+	static int user_fav_OR_checkin_callback(void* fav_OR_check_list, int argc, char** argv, char** azColName);
 
 	static bool does_region_exist(sqlite3* db, const std::string& country_name, int country_code);
 };

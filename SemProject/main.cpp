@@ -13,10 +13,19 @@ int main()
 {
     HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
     create_screen(hout);
-    clear_screen(hout, 0, 8);
     menu* mainMenu = new menu("Resturantey");
-    unsigned int option_choice = display_main_menu_and_get_choice(hout, *mainMenu);
-    process_main_menu_choice(hout, option_choice);
+    
+    unsigned int main_menu_choice;
+    while (true) {
+        clear_screen(hout, 0, 8);
+        main_menu_choice = display_main_menu_and_get_choice(hout, *mainMenu);
+        if (main_menu_choice == 3) {
+            mainMenu->display_exit_message(hout, "Thank You\n", "Hope you enjoyed our service.");
+            break;
+        }
+        process_main_menu_choice(hout, main_menu_choice);
+        
+    }
 }
 
 unsigned int display_main_menu_and_get_choice(const HANDLE& hout, menu& main_menu) {
@@ -33,13 +42,12 @@ unsigned int display_main_menu_and_get_choice(const HANDLE& hout, menu& main_men
 
 
 void process_main_menu_choice(const HANDLE& hout, unsigned int menu_choice) {
+    clear_screen(0);
     if (menu_choice == 0) {
         user* logged_in_user = new user();
         user_authenication::user_login_auth(hout, *logged_in_user);
-        //std::cout << logged_in_user->get_id();
-        logged_in_user->process_home_page_choice(hout, user::display_home_page_and_get_choice(hout));
-
-        
+        logged_in_user->display_home_page_and_process_choice(hout);
+        logged_in_user->~user();
     }
     else if (menu_choice == 1) {
         user_authenication::display_resgister_form(hout);
@@ -47,10 +55,7 @@ void process_main_menu_choice(const HANDLE& hout, unsigned int menu_choice) {
     else if (menu_choice == 2) {
         restaurants* rest = new restaurants();
         restaurants::search_rest_and(hout, *rest, "-di");
-    }
-    else if(menu_choice == 3) {
-        clear_screen(hout);
-        std::cout << "Your choice no: " << menu_choice << std::endl;
+        rest->~restaurants();
     }
     else {
         std::cout << "Error: Unexpected Behaviour" << std::endl;

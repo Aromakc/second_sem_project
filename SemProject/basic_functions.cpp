@@ -135,6 +135,21 @@ void clear_current_line(const HANDLE& hout) {
 
 }
 
+void cls_and_draw_outline(const HANDLE& hout, int ForgC, int BackC, const std::string& title, const std::string& pattern, WORD title_color)
+{
+	clear_screen(hout, ForgC, BackC);
+	create_screen_outline(hout, title, pattern, title_color);
+	goto_xy(hout, 0, 3);
+}
+
+void freeze_display(const HANDLE& hout)
+{
+	goto_xy(hout, 0, 32);
+	move_cursor_off_left_edge_and_print(hout, "Press Any Key To Continue :)", 15);
+	while (!std::cin.get()) {
+	}
+}
+
 
 void print_line_with_color(const HANDLE& hout,const std::string& line, WORD color) {
 	SetConsoleTextAttribute(hout, color);
